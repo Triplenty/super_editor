@@ -1509,7 +1509,8 @@ class SuperEditorIosToolbarOverlayManagerState extends State<SuperEditorIosToolb
     super.didChangeDependencies();
 
     _controlsController = SuperEditorIosControlsScope.rootOf(context);
-    _overlayPortalController.show();
+// 暂时不调用, 解决build phase不对的问题
+    //     _overlayPortalController.show();
   }
 
   @visibleForTesting
