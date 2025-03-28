@@ -1519,8 +1519,12 @@ class SuperEditorIosToolbarOverlayManagerState extends State<SuperEditorIosToolb
     super.didChangeDependencies();
 
     _controlsController = SuperEditorIosControlsScope.rootOf(context);
-// 暂时不调用, 解决build phase不对的问题
-    // _overlayPortalController.show();
+// 暂时catch一下, 防止抛出
+    try {
+_overlayPortalController.show();
+} catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   @visibleForTesting
@@ -1582,8 +1586,12 @@ class SuperEditorIosMagnifierOverlayManagerState extends State<SuperEditorIosMag
   void didChangeDependencies() {
     super.didChangeDependencies();
     _controlsController = SuperEditorIosControlsScope.rootOf(context);
-// 暂时不调用, 解决build phase不对的问题
-    //     _overlayPortalController.show();
+// 暂时catch一下, 防止抛出
+    try {
+_overlayPortalController.show();
+} catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   @override
