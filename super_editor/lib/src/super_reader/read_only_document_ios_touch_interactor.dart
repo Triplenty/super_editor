@@ -1050,7 +1050,11 @@ class SuperReaderIosToolbarOverlayManagerState extends State<SuperReaderIosToolb
     super.didChangeDependencies();
 
     _controlsContext = SuperReaderIosControlsScope.rootOf(context);
+try {
     _overlayPortalController.show();
+}  catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   @override
@@ -1110,8 +1114,11 @@ class SuperReaderIosMagnifierOverlayManagerState extends State<SuperReaderIosMag
     super.didChangeDependencies();
 
     _controlsContext = SuperReaderIosControlsScope.rootOf(context);
-
+try {
     _overlayPortalController.show();
+}  catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   @override
