@@ -1,5 +1,5 @@
-import 'dart:ui';
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -755,7 +755,7 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
     if (_isLongPressInProgress) {
       _longPressStrategy = null;
       _magnifierGlobalOffset.value = null;
-      _showAndHideEditingControlsAfterTapSelection(didTapOnExistingSelection: false);
+      // _showAndHideEditingControlsAfterTapSelection(didTapOnExistingSelection: false);
       return;
     }
 
