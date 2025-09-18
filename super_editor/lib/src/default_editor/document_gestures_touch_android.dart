@@ -13,14 +13,17 @@ import 'package:super_editor/src/core/document_layout.dart';
 import 'package:super_editor/src/core/document_selection.dart';
 import 'package:super_editor/src/core/edit_context.dart';
 import 'package:super_editor/src/core/editor.dart';
+import 'package:super_editor/src/default_editor/selection_upstream_downstream.dart';
 import 'package:super_editor/src/default_editor/super_editor.dart';
 import 'package:super_editor/src/default_editor/text_tools.dart';
 import 'package:super_editor/src/document_operations/selection_operations.dart';
 import 'package:super_editor/src/infrastructure/_logging.dart';
 import 'package:super_editor/src/infrastructure/content_layers.dart';
+import 'package:super_editor/src/infrastructure/document_gestures.dart';
+import 'package:super_editor/src/infrastructure/document_gestures_interaction_overrides.dart';
 import 'package:super_editor/src/infrastructure/flutter/build_context.dart';
-import 'package:super_editor/src/infrastructure/flutter/empty_box.dart';
 import 'package:super_editor/src/infrastructure/flutter/eager_pan_gesture_recognizer.dart';
+import 'package:super_editor/src/infrastructure/flutter/empty_box.dart';
 import 'package:super_editor/src/infrastructure/flutter/flutter_scheduler.dart';
 import 'package:super_editor/src/infrastructure/multi_tap_gesture.dart';
 import 'package:super_editor/src/infrastructure/platforms/android/android_document_controls.dart';
@@ -32,10 +35,7 @@ import 'package:super_editor/src/infrastructure/platforms/mobile_documents.dart'
 import 'package:super_editor/src/infrastructure/signal_notifier.dart';
 import 'package:super_editor/src/infrastructure/sliver_hybrid_stack.dart';
 import 'package:super_editor/src/infrastructure/touch_controls.dart';
-
-import '../infrastructure/document_gestures.dart';
-import '../infrastructure/document_gestures_interaction_overrides.dart';
-import 'selection_upstream_downstream.dart';
+import 'package:super_keyboard/super_keyboard.dart';
 
 /// An [InheritedWidget] that provides shared access to a [SuperEditorAndroidControlsController],
 /// which coordinates the state of Android controls like the caret, handles, magnifier, etc.
@@ -676,6 +676,9 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
   }
 
   void _onDocumentChange(_) {
+    // The user might start typing when the toolbar is visible. Hide it.
+    _controlsController!.hideToolbar();
+
     onNextFrame((_) {
       _ensureSelectionExtentIsVisible();
     });
@@ -754,9 +757,9 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
 
     // Cancel any on-going long-press.
     if (_isLongPressInProgress) {
+      _onLongPressEnd();
       _longPressStrategy = null;
       _magnifierGlobalOffset.value = null;
-      // _showAndHideEditingControlsAfterTapSelection(didTapOnExistingSelection: false);
       return;
     }
 
@@ -990,7 +993,8 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
         ..hideMagnifier()
         ..blinkCaret();
 
-      if (didTapOnExistingSelection && _isKeyboardOpen) {
+      if (didTapOnExistingSelection &&
+          SuperKeyboard.instance.mobileGeometry.value.keyboardState == KeyboardState.open) {
         // Toggle the toolbar display when the user taps on the collapsed caret,
         // or on top of an existing selection.
         //
@@ -1003,16 +1007,6 @@ class _AndroidDocumentTouchInteractorState extends State<AndroidDocumentTouchInt
         _controlsController!.hideToolbar();
       }
     }
-  }
-
-  /// Returns `true` if we *think* the software keyboard is currently open, or
-  /// `false` otherwise.
-  ///
-  /// We say "think" because Flutter doesn't report this info to us. Instead, we
-  /// inspect the bottom insets on the window, and we assume any insets greater than
-  /// zero means a keyboard is visible.
-  bool get _isKeyboardOpen {
-    return MediaQuery.viewInsetsOf(context).bottom > 0;
   }
 
   void _onPanStart(DragStartDetails details) {
