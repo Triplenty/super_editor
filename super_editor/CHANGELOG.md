@@ -1,3 +1,8 @@
+## [0.3.0-dev.35]
+### Oct 7, 2025
+* FIX: Detach plugins in `SuperEditor` `dispose()`.
+* FIX: Crash when pushing route with `delegatedTransition`.
+
 ## [0.3.0-dev.34]
 ### Sept 23, 2025
 * FIX: `MessagePageScaffold` fix its `Element` so that subtrees correctly activate and deactivate.
