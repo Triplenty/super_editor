@@ -1,3 +1,9 @@
+## [0.3.0-dev.36]
+### Oct 29, 2025
+* ADJUSTMENT: Change Android toolbar to look like latest Android OS version.
+* FIX: When loading a document that contains text with tag triggers, e.g. "/",
+       don't attempt to compose tags when placing the caret near the trigger.
+
 ## [0.3.0-dev.35]
 ### Oct 7, 2025
 * FIX: Detach plugins in `SuperEditor` `dispose()`.
