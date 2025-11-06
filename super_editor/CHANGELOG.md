@@ -1,3 +1,8 @@
+## [0.3.0-dev.37]
+### Nov 5, 2025
+* ADJUSTMENT: Upgrade `super_keyboard` to `v0.3.0`.
+* ADJUSTMENT: Upgrade `follow_the_leader` to `v0.5.2`.
+
 ## [0.3.0-dev.36]
 ### Oct 29, 2025
 * ADJUSTMENT: Change Android toolbar to look like latest Android OS version.
