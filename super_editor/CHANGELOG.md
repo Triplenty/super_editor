@@ -1,3 +1,14 @@
+## [0.3.0-dev.39]
+### Nov 13, 2025
+* FIX: `MessagePageScaffold` bottom sheet animation glitches fixed.
+* ADJUSTMENT: `MessagePageScaffold` now has an optional maximum intrinsic height when 
+   not in "expanded" mode.
+* FIX: When an `Editable` or listener responding to an `Editable` can now immediately 
+   submit `Editor` requests without blowing up.
+* ADJUSTMENT: Don't require a `MutableDocument` or `MutableDocumentComposer` when calling
+   `createDefaultEditor()`.
+* FIX: Move remaining `OverlayController.show()` calls to post frame callbacks.
+
 ## [0.3.0-dev.38]
 ### Nov 9, 2025
 * BREAKING, FIX: Rework `SuperEditorPlugin` lifecycle because we discovered that when
