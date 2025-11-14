@@ -1,3 +1,8 @@
+## [0.3.0-dev.40]
+### Nov 13, 2025
+* BREAKING: Moved all `super_editor_markdown` code into `super_editor`. Will now
+   deprecate `super_editor_markdown` in favor of just using `super_editor`.
+
 ## [0.3.0-dev.39]
 ### Nov 13, 2025
 * FIX: `MessagePageScaffold` bottom sheet animation glitches fixed.
