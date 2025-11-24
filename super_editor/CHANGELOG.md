@@ -1,3 +1,15 @@
+## [0.3.0-dev.41]
+### Nov 24, 2025
+* BREAKING: Centralized all `SuperEditor` IME connections. This change was made in an attempt to fix
+            some non-reproducible issues where the IME keyboard would lose connection to a `SuperEditor`.
+   * To upgrade to this version, you need to give each of your `SuperEditor` widgets a unique `inputRole`.
+     The specific value of the `inputRole` doesn't matter, so long as different `SuperEditor`s in your app
+     use different values.
+* BREAKING: Moved all `super_editor_quill` code into `super_editor`. Will now
+  deprecate `super_editor_quill` in favor of just using `super_editor`.
+* FEATURE: Create a `SuperMessage` widget, which is an intrinsically sized document, like a
+  `SuperReader` with intrinsic sizing and no scrolling. Made for chat use-cases.
+
 ## [0.3.0-dev.40]
 ### Nov 13, 2025
 * BREAKING: Moved all `super_editor_markdown` code into `super_editor`. Will now
