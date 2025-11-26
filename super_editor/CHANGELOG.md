@@ -1,3 +1,13 @@
+## [0.3.0-dev.42]
+### Nov 26, 2025
+* ADJUSTMENT: `MarkdownTableComponent`s now let you specify a column width policy, and a fit policy.
+* FEATURE: Added a `GlobalScrollLock` to prevent two-dimensional scrolling with trackpad and Magic Mouse
+  when the user expects only a single axis to scroll. E.g., scrolling a document vertically vs scrolling
+  a table component horizontally.
+  * Used by `SingleAxisTrackpadAndWheelScroller` to implement single-axis trackpad and scroll wheel scrolling.
+  * Override your existing gesture-based scrollables with a `DeferToTrackpadsAndMouseWheelsScrollBehavior` to
+    get them to defer to the `GlobalScrollLock`, too.
+
 ## [0.3.0-dev.41]
 ### Nov 24, 2025
 * BREAKING: Centralized all `SuperEditor` IME connections. This change was made in an attempt to fix
