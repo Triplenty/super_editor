@@ -1,3 +1,9 @@
+## [0.3.0-dev.43]
+### Dec 2, 2025
+* FIX: `ImeFocusPolicy` wasn't unregistering its focus listener on disposal. This could result in a
+  defunct `ImeFocusPolicy` responding to focus changes as if it still existed, interfering with a new,
+  visible `SuperEditor`.
+
 ## [0.3.0-dev.42]
 ### Nov 26, 2025
 * ADJUSTMENT: `MarkdownTableComponent`s now let you specify a column width policy, and a fit policy.
