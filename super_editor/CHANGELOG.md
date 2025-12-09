@@ -1,3 +1,10 @@
+## [0.3.0-dev.44]
+### Dec 8, 2025
+* FEATURE: Add mobile handle, magnifier, and toolbar to `SuperMessage`.
+* BREAKING: Rename `DocumentKeyboardAction` to `SuperEditorKeyboardAction`, also created a different definition 
+  for `DocumentKeyboardAction`
+* ADJUSTMENT: Moved a bunch of test tools from `/test` and `/test_goldens` directory into the `/lib`.
+
 ## [0.3.0-dev.43]
 ### Dec 2, 2025
 * FIX: `ImeFocusPolicy` wasn't unregistering its focus listener on disposal. This could result in a
