@@ -1,3 +1,11 @@
+## [0.3.0-dev.45]
+### Dec 10, 2025
+* ADJUSTMENT: Make Android mobile handles use an eager gesture recognizer so that things like
+  drawers don't beat the handle drag gestures.
+* FIX: `SuperEditor` - When the Android handles change the selection, `SuperEditor` now passes
+  the correct "selection change type". Previously it was always hard-coded to "push caret".
+* FIX: `SuperMessage` - Re-render visual styles when the incoming `styles` property changes.
+
 ## [0.3.0-dev.44]
 ### Dec 8, 2025
 * FEATURE: Add mobile handle, magnifier, and toolbar to `SuperMessage`.
