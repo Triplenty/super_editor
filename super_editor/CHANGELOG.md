@@ -1,3 +1,9 @@
+## [0.3.0-dev.46]
+### Dec 13, 2025
+* FIX: When pasting structured content, the first pasted node was getting lost.
+* FIX: When pasting structured content, if pasting a single non-text node, an extra blank paragraph was retained above it.
+* ADJUSTMENT: Implements content equivalency check for `TableBlockNode`.
+
 ## [0.3.0-dev.45]
 ### Dec 10, 2025
 * ADJUSTMENT: Make Android mobile handles use an eager gesture recognizer so that things like
