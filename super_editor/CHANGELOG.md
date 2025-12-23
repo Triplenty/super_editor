@@ -1,3 +1,7 @@
+## [0.3.0-dev.47]
+### Dec 22, 2025
+* FIX: When restoring selection after re-gaining focus, correctly report the `SelectionChangeType`.
+
 ## [0.3.0-dev.46]
 ### Dec 13, 2025
 * FIX: When pasting structured content, the first pasted node was getting lost.
