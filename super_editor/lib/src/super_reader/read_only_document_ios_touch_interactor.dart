@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_the_leader/follow_the_leader.dart';
 import 'package:super_editor/src/core/document.dart';
+import 'package:super_editor/src/core/document_composer.dart';
 import 'package:super_editor/src/core/document_layout.dart';
 import 'package:super_editor/src/core/document_selection.dart';
 import 'package:super_editor/src/default_editor/document_gestures_touch_ios.dart';
@@ -12,10 +13,11 @@ import 'package:super_editor/src/default_editor/text_tools.dart';
 import 'package:super_editor/src/document_operations/selection_operations.dart';
 import 'package:super_editor/src/infrastructure/_logging.dart';
 import 'package:super_editor/src/infrastructure/content_layers.dart';
+import 'package:super_editor/src/infrastructure/document_context.dart';
 import 'package:super_editor/src/infrastructure/document_gestures.dart';
 import 'package:super_editor/src/infrastructure/document_gestures_interaction_overrides.dart';
-import 'package:super_editor/src/infrastructure/flutter/eager_pan_gesture_recognizer.dart';
 import 'package:super_editor/src/infrastructure/flutter/build_context.dart';
+import 'package:super_editor/src/infrastructure/flutter/eager_pan_gesture_recognizer.dart';
 import 'package:super_editor/src/infrastructure/flutter/flutter_scheduler.dart';
 import 'package:super_editor/src/infrastructure/multi_tap_gesture.dart';
 import 'package:super_editor/src/infrastructure/platforms/ios/ios_document_controls.dart';
@@ -27,8 +29,6 @@ import 'package:super_editor/src/infrastructure/sliver_hybrid_stack.dart';
 import 'package:super_editor/src/infrastructure/touch_controls.dart';
 import 'package:super_editor/src/super_reader/reader_context.dart';
 import 'package:super_editor/src/super_reader/super_reader.dart';
-
-import '../core/document_composer.dart';
 
 /// An [InheritedWidget] that provides shared access to a [SuperReaderIosControlsController],
 /// which coordinates the state of iOS controls like drag handles, magnifier, and toolbar.
@@ -204,7 +204,7 @@ class SuperReaderIosDocumentTouchInteractor extends StatefulWidget {
 
   final FocusNode focusNode;
 
-  final SuperReaderContext readerContext;
+  final DocumentContext readerContext;
 
   final GlobalKey documentKey;
   final DocumentLayout Function() getDocumentLayout;
@@ -1077,11 +1077,13 @@ class SuperReaderIosToolbarOverlayManagerState extends State<SuperReaderIosToolb
     super.didChangeDependencies();
 
     _controlsContext = SuperReaderIosControlsScope.rootOf(context);
-try {
-    _overlayPortalController.show();
-}  catch (e) {
-      debugPrint(e.toString());
-    }
+
+    // It's possible that `didChangeDependencies` is called during build when pushing a route
+    // that has a delegated transition. We need to wait until the next frame to show the overlay,
+    // otherwise this widget crashes, since we can't call `OverlayPortalController.show` during build.
+    onNextFrame((timeStamp) {
+      _overlayPortalController.show();
+    });
   }
 
   @override
@@ -1141,11 +1143,13 @@ class SuperReaderIosMagnifierOverlayManagerState extends State<SuperReaderIosMag
     super.didChangeDependencies();
 
     _controlsContext = SuperReaderIosControlsScope.rootOf(context);
-try {
-    _overlayPortalController.show();
-}  catch (e) {
-      debugPrint(e.toString());
-    }
+
+    // It's possible that `didChangeDependencies` is called during build when pushing a route
+    // that has a delegated transition. We need to wait until the next frame to show the overlay,
+    // otherwise this widget crashes, since we can't call `OverlayPortalController.show` during build.
+    onNextFrame((timeStamp) {
+      _overlayPortalController.show();
+    });
   }
 
   @override

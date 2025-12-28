@@ -1375,6 +1375,7 @@ class SuperEditorAndroidControlsOverlayManager extends StatefulWidget {
 
 @visibleForTesting
 class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAndroidControlsOverlayManager> {
+  final _boundsKey = GlobalKey();
   final _overlayController = OverlayPortalController();
 
   SuperEditorAndroidControlsController? _controlsController;
@@ -1401,14 +1402,16 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
   @override
   void initState() {
     super.initState();
-    _overlayController.show();
+
     widget.selection.addListener(_onSelectionChange);
+
     _collapsedHandleGestureDelegate = DocumentHandleGestureDelegate(
       onTap: _toggleToolbarOnCollapsedHandleTap,
       onPanStart: (details) => _onHandlePanStart(details, HandleType.collapsed),
       onPanUpdate: _onHandlePanUpdate,
       onPanEnd: (details) => _onHandlePanEnd(details, HandleType.collapsed),
     );
+
     _upstreamHandleGesturesDelegate = DocumentHandleGestureDelegate(
       onTap: () {
         // Register tap down to win gesture arena ASAP.
@@ -1418,6 +1421,7 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
       onPanEnd: (details) => _onHandlePanEnd(details, HandleType.upstream),
       onPanCancel: () => _onHandlePanCancel(HandleType.upstream),
     );
+
     _downstreamHandleGesturesDelegate = DocumentHandleGestureDelegate(
       onTap: () {
         // Register tap down to win gesture arena ASAP.
@@ -1427,6 +1431,12 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
       onPanEnd: (details) => _onHandlePanEnd(details, HandleType.downstream),
       onPanCancel: () => _onHandlePanCancel(HandleType.downstream),
     );
+
+    onNextFrame((_) {
+      // Call `show()` at the end of the frame because calling during a build
+      // process blows up.
+      _overlayController.show();
+    });
   }
 
   @override
@@ -1434,9 +1444,11 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
     super.didChangeDependencies();
 
     _controlsController = SuperEditorAndroidControlsScope.rootOf(context);
-    // TODO: Replace Cupertino aligner with a generic aligner because this code runs on Android.
-    _toolbarAligner = CupertinoPopoverToolbarAligner();
-    widget.selection.addListener(_onSelectionChange);
+    // TODO: Replace CupertinoPopoverToolbarAligner aligner with a generic aligner because this code runs on Android.
+    _toolbarAligner = CupertinoPopoverToolbarAligner(
+      toolbarVerticalOffsetAbove: 20,
+      toolbarVerticalOffsetBelow: 90,
+    );
   }
 
   @override
@@ -1735,6 +1747,7 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
     return TapRegion(
       groupId: widget.tapRegionGroupId,
       child: Stack(
+        key: _boundsKey,
         children: [
           _buildMagnifierFocalPoint(),
           if (widget.showDebugPaint) //
@@ -1793,19 +1806,31 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
               // explicit IgnorePointer, gestures were still being captured by this handle.
               ignoring: !shouldShow,
               child: GestureDetector(
-                onTapDown: (_) {
-                  // Register tap down to win gesture arena ASAP.
-                },
                 onTap: _collapsedHandleGestureDelegate.onTap,
-                onPanStart: _collapsedHandleGestureDelegate.onPanStart,
-                onPanUpdate: _collapsedHandleGestureDelegate.onPanUpdate,
-                onPanEnd: _collapsedHandleGestureDelegate.onPanEnd,
-                onPanCancel: _collapsedHandleGestureDelegate.onPanCancel,
-                dragStartBehavior: DragStartBehavior.down,
-                child: AndroidSelectionHandle(
-                  key: DocumentKeys.androidCaretHandle,
-                  handleType: HandleType.collapsed,
-                  color: _controlsController!.controlsColor ?? Theme.of(context).primaryColor,
+                child: RawGestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  gestures: <Type, GestureRecognizerFactory>{
+                    EagerPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<EagerPanGestureRecognizer>(
+                      () => EagerPanGestureRecognizer(),
+                      (EagerPanGestureRecognizer instance) {
+                        instance
+                          ..shouldAccept = () {
+                            return true;
+                          }
+                          ..dragStartBehavior = DragStartBehavior.down
+                          ..onStart = _collapsedHandleGestureDelegate.onPanStart
+                          ..onUpdate = _collapsedHandleGestureDelegate.onPanUpdate
+                          ..onEnd = _collapsedHandleGestureDelegate.onPanEnd
+                          ..onCancel = _collapsedHandleGestureDelegate.onPanCancel
+                          ..gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+                      },
+                    ),
+                  },
+                  child: AndroidSelectionHandle(
+                    key: DocumentKeys.androidCaretHandle,
+                    handleType: HandleType.collapsed,
+                    color: _controlsController!.controlsColor ?? Theme.of(context).primaryColor,
+                  ),
                 ),
               ),
             ),
@@ -1852,13 +1877,25 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
             // Use the offset to account for the invisible expanded touch region around the handle.
             offset:
                 -AndroidSelectionHandle.defaultTouchRegionExpansion.topRight * MediaQuery.devicePixelRatioOf(context),
-            child: GestureDetector(
-              onTapDown: _upstreamHandleGesturesDelegate.onTapDown,
-              onPanStart: _upstreamHandleGesturesDelegate.onPanStart,
-              onPanUpdate: _upstreamHandleGesturesDelegate.onPanUpdate,
-              onPanEnd: _upstreamHandleGesturesDelegate.onPanEnd,
-              onPanCancel: _upstreamHandleGesturesDelegate.onPanCancel,
-              dragStartBehavior: DragStartBehavior.down,
+            child: RawGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              gestures: <Type, GestureRecognizerFactory>{
+                EagerPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<EagerPanGestureRecognizer>(
+                  () => EagerPanGestureRecognizer(),
+                  (EagerPanGestureRecognizer instance) {
+                    instance
+                      ..shouldAccept = () {
+                        return true;
+                      }
+                      ..dragStartBehavior = DragStartBehavior.down
+                      ..onStart = _upstreamHandleGesturesDelegate.onPanStart
+                      ..onUpdate = _upstreamHandleGesturesDelegate.onPanUpdate
+                      ..onEnd = _upstreamHandleGesturesDelegate.onPanEnd
+                      ..onCancel = _upstreamHandleGesturesDelegate.onPanCancel
+                      ..gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+                  },
+                ),
+              },
               child: AndroidSelectionHandle(
                 key: DocumentKeys.upstreamHandle,
                 handleType: HandleType.upstream,
@@ -1883,13 +1920,25 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
             // Use the offset to account for the invisible expanded touch region around the handle.
             offset:
                 -AndroidSelectionHandle.defaultTouchRegionExpansion.topLeft * MediaQuery.devicePixelRatioOf(context),
-            child: GestureDetector(
-              onTapDown: _downstreamHandleGesturesDelegate.onTapDown,
-              onPanStart: _downstreamHandleGesturesDelegate.onPanStart,
-              onPanUpdate: _downstreamHandleGesturesDelegate.onPanUpdate,
-              onPanEnd: _downstreamHandleGesturesDelegate.onPanEnd,
-              onPanCancel: _downstreamHandleGesturesDelegate.onPanCancel,
-              dragStartBehavior: DragStartBehavior.down,
+            child: RawGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              gestures: <Type, GestureRecognizerFactory>{
+                EagerPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<EagerPanGestureRecognizer>(
+                  () => EagerPanGestureRecognizer(),
+                  (EagerPanGestureRecognizer instance) {
+                    instance
+                      ..shouldAccept = () {
+                        return true;
+                      }
+                      ..dragStartBehavior = DragStartBehavior.down
+                      ..onStart = _downstreamHandleGesturesDelegate.onPanStart
+                      ..onUpdate = _downstreamHandleGesturesDelegate.onPanUpdate
+                      ..onEnd = _downstreamHandleGesturesDelegate.onPanEnd
+                      ..onCancel = _downstreamHandleGesturesDelegate.onPanCancel
+                      ..gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+                  },
+                ),
+              },
               child: AndroidSelectionHandle(
                 key: DocumentKeys.downstreamHandle,
                 handleType: HandleType.downstream,
@@ -1911,10 +1960,7 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
       child: Follower.withAligner(
         link: _controlsController!.toolbarFocalPoint,
         aligner: _toolbarAligner,
-        boundary: ScreenFollowerBoundary(
-          screenSize: MediaQuery.sizeOf(context),
-          devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
-        ),
+        boundary: const ScreenFollowerBoundary(),
         child: _toolbarBuilder(context, DocumentKeys.mobileToolbar, _controlsController!.toolbarFocalPoint),
       ),
     );
@@ -1979,10 +2025,7 @@ class SuperEditorAndroidControlsOverlayManagerState extends State<SuperEditorAnd
       offset: Offset(0, -54 * devicePixelRatio),
       leaderAnchor: Alignment.center,
       followerAnchor: Alignment.center,
-      boundary: ScreenFollowerBoundary(
-        screenSize: MediaQuery.sizeOf(context),
-        devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
-      ),
+      boundary: const ScreenFollowerBoundary(),
       child: AndroidMagnifyingGlass(
         key: magnifierKey,
         magnificationScale: 1.5,
