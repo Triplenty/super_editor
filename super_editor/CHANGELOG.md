@@ -1,3 +1,8 @@
+## [0.3.0-dev.48]
+### Jan 19, 2026
+* FEATURE: Added `BitmapImageNode`, which holds in-memory images, supplementing `ImageNode`, which only handles URLs.
+* FIX: Get builds on web working again by conditionally exporting test dependencies.
+
 ## [0.3.0-dev.47]
 ### Dec 22, 2025
 * FIX: When restoring selection after re-gaining focus, correctly report the `SelectionChangeType`.
