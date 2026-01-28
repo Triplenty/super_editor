@@ -1,3 +1,7 @@
+## [0.2.5]
+### Jan 28, 2026
+* Expose public method for native clipboard pasting into `Editor`: `pasteIntoEditorFromNativeClipboard`.
+
 ## [0.2.4]
 ### Jan 26, 2026
 * iOS: Added swizzling to Flutter's iOS delegate that answers the question "is there content to paste?".
