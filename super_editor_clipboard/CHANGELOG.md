@@ -1,3 +1,18 @@
+## [0.2.5]
+### Jan 28, 2026
+* Expose public method for native clipboard pasting into `Editor`: `pasteIntoEditorFromNativeClipboard`.
+
+## [0.2.4]
+### Jan 26, 2026
+* iOS: Added swizzling to Flutter's iOS delegate that answers the question "is there content to paste?".
+       We did this because Flutter only says "yes" when there's text data on the clipboard, but we
+       also want to support binary pasting.
+
+## [0.2.3]
+### Jan 19, 2026
+* **CHANGED PACKAGE TO A PLUGIN**
+* iOS: Created plugin that swizzles Flutter's paste behavior and lets your app handle native toolbar pasting.
+
 ## [0.2.2]
 ### Dec 13, 2025
 * FEATURE: Rich text paste (from HTML)
