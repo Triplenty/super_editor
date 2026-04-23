@@ -265,6 +265,7 @@ class IosDocumentTouchInteractor extends StatefulWidget {
     required this.document,
     required this.getDocumentLayout,
     required this.selection,
+    required this.isImeConnected,
     this.openKeyboardWhenTappingExistingSelection = true,
     this.openKeyboardOnSelectionChange = true,
     required this.openSoftwareKeyboard,
@@ -283,6 +284,14 @@ class IosDocumentTouchInteractor extends StatefulWidget {
   final Document document;
   final DocumentLayout Function() getDocumentLayout;
   final ValueListenable<DocumentSelection?> selection;
+
+  /// A listenable that reports whether the IME is currently connected to this
+  /// editor, which means either a software keyboard or hardware keyboard is
+  /// currently configured to edit the document in this editor.
+  ///
+  /// This signal is used to, for example, to decide whether we should show
+  /// the popover toolbar on tap.
+  final ValueListenable<bool> isImeConnected;
 
   /// {@macro openKeyboardWhenTappingExistingSelection}
   final bool openKeyboardWhenTappingExistingSelection;
@@ -370,6 +379,10 @@ class _IosDocumentTouchInteractorState extends State<IosDocumentTouchInteractor>
 
     widget.document.addListener(_onDocumentChange);
 
+    widget.focusNode.addListener(_onFocusChange);
+
+    widget.isImeConnected.addListener(_onImeConnectionChange);
+
     _floatingCursorListener = FloatingCursorListener(
       onStart: _onFloatingCursorStart,
       onStop: _onFloatingCursorStop,
@@ -406,6 +419,20 @@ class _IosDocumentTouchInteractorState extends State<IosDocumentTouchInteractor>
       oldWidget.document.removeListener(_onDocumentChange);
       widget.document.addListener(_onDocumentChange);
     }
+
+    if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode.removeListener(_onFocusChange);
+      widget.focusNode.addListener(_onFocusChange);
+    }
+
+    if (widget.isImeConnected != oldWidget.isImeConnected) {
+      oldWidget.isImeConnected.removeListener(_onImeConnectionChange);
+      widget.isImeConnected.addListener(_onImeConnectionChange);
+
+      if (oldWidget.isImeConnected.value != widget.isImeConnected.value) {
+        _onImeConnectionChange();
+      }
+    }
   }
 
   @override
@@ -415,6 +442,10 @@ class _IosDocumentTouchInteractorState extends State<IosDocumentTouchInteractor>
     _controlsController!.floatingCursorController.removeListener(_floatingCursorListener);
     _controlsController!.floatingCursorController.cursorGeometryInViewport
         .removeListener(_onFloatingCursorGeometryChange);
+
+    widget.isImeConnected.removeListener(_onImeConnectionChange);
+
+    widget.focusNode.removeListener(_onFocusChange);
 
     widget.document.removeListener(_onDocumentChange);
 
@@ -446,6 +477,23 @@ class _IosDocumentTouchInteractorState extends State<IosDocumentTouchInteractor>
     onNextFrame((_) {
       _ensureSelectionExtentIsVisible();
     });
+  }
+
+  void _onFocusChange() {
+    if (!widget.focusNode.hasFocus) {
+      // Overlay controls shouldn't be visible when there's no focus.
+      _controlsController
+        ?..hideToolbar()
+        ..hideMagnifier();
+    }
+  }
+
+  void _onImeConnectionChange() {
+    if (!widget.isImeConnected.value) {
+      // Our editor doesn't have an IME connection. Ensure that our visual state
+      // is acceptable when we don't have an open IME connection.
+      _controlsController?.hideToolbar();
+    }
   }
 
   void _ensureSelectionExtentIsVisible() {
@@ -661,8 +709,7 @@ class _IosDocumentTouchInteractorState extends State<IosDocumentTouchInteractor>
           selection.extent.nodeId == docPosition.nodeId &&
           selection.extent.nodePosition.isEquivalentTo(docPosition.nodePosition);
 
-      if (didTapOnExistingSelection &&
-          SuperKeyboard.instance.mobileGeometry.value.keyboardState == KeyboardState.open) {
+      if (didTapOnExistingSelection && widget.isImeConnected.value) {
         // Toggle the toolbar display when the user taps on the collapsed caret,
         // or on top of an existing selection.
         //
